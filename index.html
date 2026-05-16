@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thermal Shift | Global Climate Intelligence Platform</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --deep-teal: #0a2e2a;
+            --burnt-sienna: #d95d39;
+            --dark-orange: #cc5500;
+            --orange-glow: #ff6b35;
+            --sandstone: #f5efe6;
+            --charcoal: #1e1e1e;
+            --cool-mist: #b8cfc8;
+            --warm-sand: #e8dfd0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--sandstone);
+            color: var(--charcoal);
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 0.4rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: rgba(245, 239, 230, 0.98);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            font-family: 'Space Grotesk', monospace;
+            color: var(--deep-teal);
+            letter-spacing: -0.02em;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--charcoal);
+            font-weight: 500;
+            transition: color 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .nav-links a:hover {
+            color: var(--burnt-sienna);
+        }
+
+        .hero {
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        #bg-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            max-width: 900px;
+            padding: 0 2rem;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: rgba(10, 46, 42, 0.9);
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            letter-spacing: 2px;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .hero h1 {
+            font-size: clamp(3rem, 8vw, 5.5rem);
+            font-weight: 800;
+            font-family: 'Space Grotesk', monospace;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+            min-height: 220px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dynamic-line {
+            display: block;
+            text-align: center;
+        }
+
+        /* Complete line shining + rolling effect */
+        .shining-text {
+            display: inline-block;
+            background: linear-gradient(
+                135deg, 
+                var(--deep-teal) 0%,
+                var(--deep-teal) 20%,
+                var(--dark-orange) 45%,
+                var(--burnt-sienna) 50%,
+                var(--dark-orange) 55%,
+                var(--deep-teal) 80%,
+                var(--deep-teal) 100%
+            );
+            background-size: 300% auto;
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            animation: shineRoll 2.5s linear infinite;
+        }
+
+        @keyframes shineRoll {
+            0% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: -100% 50%;
+            }
+        }
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 1.5rem auto;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .hero-button {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .stats-section {
+            padding: 5rem 5%;
+            background: var(--deep-teal);
+            color: white;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 1rem;
+            padding: 2rem;
+            transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            cursor: pointer;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-12px) scale(1.03);
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.8;
+        }
+
+        .stat-number {
+            font-size: 3.2rem;
+            font-weight: 700;
+            font-family: 'Space Grotesk', monospace;
+            color: var(--burnt-sienna);
+            margin: 0.8rem 0;
+        }
+
+        .stat-source {
+            font-size: 0.7rem;
+            opacity: 0.6;
+        }
+
+        .research-preview {
+            padding: 5rem 5%;
+            background: var(--sandstone);
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 3rem;
+            font-family: 'Space Grotesk', monospace;
+        }
+
+        .research-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .research-card {
+            background: white;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            cursor: pointer;
+        }
+
+        .research-card:hover {
+            transform: translateY(-12px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 220px;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        .card-category {
+            color: var(--burnt-sienna);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+            font-family: 'Space Grotesk', monospace;
+        }
+
+        .card-excerpt {
+            color: #555;
+            line-height: 1.5;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .calculator-section {
+            padding: 5rem 5%;
+            background: var(--charcoal);
+            color: white;
+        }
+
+        .calc-container {
+            max-width: 550px;
+            margin: 0 auto;
+        }
+
+        .calc-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .calc-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .calc-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            font-family: 'Space Grotesk', monospace;
+        }
+
+        .calc-subtitle {
+            font-size: 0.85rem;
+            opacity: 0.7;
+            margin-bottom: 2rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 4px;
+            border-radius: 2px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            accent-color: var(--burnt-sienna);
+        }
+
+        .calc-result {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            text-align: center;
+            margin-top: 2rem;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .map-section {
+            padding: 5rem 5%;
+            background: var(--warm-sand);
+        }
+
+        .map-container {
+            max-width: 1300px;
+            margin: 0 auto;
+            background: var(--deep-teal);
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .map-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+        }
+
+        #globalMap {
+            height: 500px;
+            width: 100%;
+            background: #1a3a35;
+        }
+
+        .map-legend {
+            padding: 1rem 2rem;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            color: white;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        .map-message {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .cta-section {
+            padding: 5rem 5%;
+            background: var(--deep-teal);
+            color: white;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: var(--burnt-sienna);
+            border: none;
+            padding: 1rem 2.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1.5rem;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            background: #c04c2b;
+            box-shadow: 0 10px 20px rgba(217, 93, 57, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--burnt-sienna);
+            padding: 1rem 2.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            color: var(--burnt-sienna);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: var(--burnt-sienna);
+            color: white;
+            transform: scale(1.02);
+        }
+
+        footer {
+            background: #0a0a0a;
+            color: #666;
+            text-align: center;
+            padding: 2rem;
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            .research-grid {
+                grid-template-columns: 1fr;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--deep-teal);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            transition: opacity 0.5s;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="loader" id="loader">
+        <div style="color: white; font-size: 1.5rem; font-weight: 700;">Thermal Shift</div>
+    </div>
+
+    <nav class="navbar">
+        <div class="logo">THERMAL SHIFT</div>
+        <div class="nav-links">
+            <a href="#home">Home</a>
+            <a href="#research">Research</a>
+            <a href="#calculator">Calculator</a>
+            <a href="#map">Global Map</a>
+            <a href="research-detail.html" id="researchLink">Research Library</a>
+        </div>
+    </nav>
+
+    <section class="hero" id="home">
+        <canvas id="bg-canvas"></canvas>
+        <div class="hero-content">
+            <div class="hero-badge">GLOBAL CLIMATE INTELLIGENCE 2026</div>
+            <h1 id="heroHeading">
+                <span class="dynamic-line" id="dynamicText"></span>
+            </h1>
+            <p class="hero-subtitle">Data-driven climate resilience strategies for urban environments worldwide</p>
+            <div class="hero-button">
+                <button class="btn-primary" id="exploreResearch">Explore Research →</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="stats-section">
+        <div class="stats-grid" id="statsGrid"></div>
+    </section>
+
+    <section class="research-preview" id="research">
+        <h2 class="section-title">Climate Research & Policy Briefs</h2>
+        <div class="research-grid" id="researchGrid"></div>
+        <div style="text-align: center; margin-top: 3rem;">
+            <button class="btn-secondary" id="fullResearchBtn">Access Complete Research Library →</button>
+        </div>
+    </section>
+
+    <section class="calculator-section" id="calculator">
+        <div class="calc-container">
+            <div class="calc-card">
+                <div class="calc-title">Climate Impact Calculator</div>
+                <div class="calc-subtitle">Estimate your cooling-related carbon footprint</div>
+                
+                <div class="input-group">
+                    <div class="input-label">
+                        <span>Daily Air Conditioning Usage</span>
+                        <span id="acValue">8 hours/day</span>
+                    </div>
+                    <input type="range" id="acSlider" min="0" max="20" value="8" step="1">
+                </div>
+                
+                <div class="input-group">
+                    <div class="input-label">
+                        <span>Household Occupancy</span>
+                        <span id="householdValue">3 residents</span>
+                    </div>
+                    <input type="range" id="householdSlider" min="1" max="10" value="3" step="1">
+                </div>
+                
+                <div class="input-group">
+                    <div class="input-label">
+                        <span>Building Energy Efficiency</span>
+                        <span id="efficiencyValue">Standard</span>
+                    </div>
+                    <input type="range" id="efficiencySlider" min="0" max="100" value="50" step="10">
+                </div>
+                
+                <div class="calc-result" id="calcResult">
+                    Estimated annual carbon footprint from cooling: 1.2 metric tons CO₂e
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="map-section" id="map">
+        <h2 class="section-title">Global Heat Vulnerability Index</h2>
+        <div class="map-container">
+            <div id="globalMap"></div>
+            <div class="map-legend">
+                <div class="legend-item"><div class="legend-color" style="background: #d95d39;"></div><span>Extreme Risk</span></div>
+                <div class="legend-item"><div class="legend-color" style="background: #e6b17e;"></div><span>High Risk</span></div>
+                <div class="legend-item"><div class="legend-color" style="background: #b8cfc8;"></div><span>Moderate Risk</span></div>
+                <div class="legend-item"><div class="legend-color" style="background: #4a6741;"></div><span>Low Risk</span></div>
+            </div>
+            <div class="map-message" id="mapMessage">
+                Click on any highlighted region to view climate vulnerability data
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <h2 style="font-size: 2rem; margin-bottom: 1rem;">Join the Thermal Shift Alliance</h2>
+        <p style="max-width: 600px; margin: 0 auto; opacity: 0.8;">128,000+ climate professionals, researchers, and citizens worldwide</p>
+        <button class="btn-primary" id="pledgeButton">Take the Pledge →</button>
+    </section>
+
+    <footer>
+        <p>Thermal Shift Initiative — Data sourced from IPCC AR6, World Meteorological Organization, NASA Earth Observatory, and C40 Cities Climate Leadership Group</p>
+        <p style="margin-top: 1rem;">Open-source climate intelligence platform | Research updated quarterly</p>
+    </footer>
+
+    <script>
+        // Loader
+        window.addEventListener('load', () => {
+            const loader = document.getElementById('loader');
+            gsap.to(loader, {
+                duration: 0.6,
+                opacity: 0,
+                onComplete: () => loader.style.display = 'none'
+            });
+            
+            setTimeout(() => {
+                startTypingAnimation();
+            }, 300);
+        });
+
+        // ========== DYNAMIC TYPING ANIMATION WITH SHINING + ROLLING EFFECT ==========
+        const textToType = "Beyond the\nHeat Threshold";
+        const lines = textToType.split('\n');
+        let currentLineIndex = 0;
+        let currentCharIndex = 0;
+        
+        function startTypingAnimation() {
+            const dynamicTextElement = document.getElementById('dynamicText');
+            
+            function typeEffect() {
+                if (currentLineIndex >= lines.length) {
+                    return;
+                }
+                
+                const currentLine = lines[currentLineIndex];
+                
+                if (currentCharIndex <= currentLine.length) {
+                    let displayHTML = '';
+                    
+                    if (currentLineIndex === 0) {
+                        displayHTML = currentLine.substring(0, currentCharIndex);
+                    } else {
+                        const lineText = currentLine.substring(0, currentCharIndex);
+                        // Full text with shining effect on complete line
+                        if (currentCharIndex === currentLine.length) {
+                            displayHTML = lines[0] + '<br><span class="shining-text">Heat Threshold</span>';
+                        } else {
+                            displayHTML = lines[0] + '<br><span class="shining-text">' + lineText + '</span>';
+                        }
+                    }
+                    
+                    dynamicTextElement.innerHTML = displayHTML;
+                    currentCharIndex++;
+                    setTimeout(typeEffect, 70);
+                } else {
+                    if (currentLineIndex === 0) {
+                        currentLineIndex++;
+                        currentCharIndex = 0;
+                        setTimeout(typeEffect, 200);
+                    } else {
+                        // Final display with shining + rolling effect on full text
+                        dynamicTextElement.innerHTML = lines[0] + '<br><span class="shining-text">Heat Threshold</span>';
+                        return;
+                    }
+                }
+            }
+            
+            dynamicTextElement.innerHTML = '';
+            currentLineIndex = 0;
+            currentCharIndex = 0;
+            typeEffect();
+            
+            gsap.to('.hero-badge', {
+                duration: 0.8,
+                opacity: 1,
+                y: 0,
+                delay: 0.5
+            });
+            
+            gsap.to('.hero-subtitle', {
+                duration: 0.8,
+                opacity: 1,
+                y: 0,
+                delay: 1.8
+            });
+            
+            gsap.to('.hero-button', {
+                duration: 0.8,
+                opacity: 1,
+                y: 0,
+                delay: 2.1
+            });
+        }
+
+        // Three.js Background
+        const canvas = document.getElementById('bg-canvas');
+        if (canvas) {
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            
+            const particleCount = 1500;
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+            for (let i = 0; i < particleCount; i++) {
+                positions[i*3] = (Math.random() - 0.5) * 40;
+                positions[i*3+1] = (Math.random() - 0.5) * 20;
+                positions[i*3+2] = (Math.random() - 0.5) * 20;
+            }
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            const material = new THREE.PointsMaterial({
+                color: 0xd95d39,
+                size: 0.04,
+                transparent: true,
+                opacity: 0.3
+            });
+            const particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+            camera.position.z = 15;
+            
+            let time = 0;
+            function animate() {
+                requestAnimationFrame(animate);
+                time += 0.003;
+                particles.rotation.y = time * 0.15;
+                particles.rotation.x = Math.sin(time * 0.2) * 0.05;
+                renderer.render(scene, camera);
+            }
+            animate();
+            
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+
+        // ========== 6 STAT CARDS ==========
+        const statsData = [
+            { label: 'GLOBAL TEMPERATURE ANOMALY', value: '+1.62°C', source: 'NASA GISTEMP v4', id: 'tempAnomaly' },
+            { label: 'URBAN HEAT ISLAND INTENSITY', value: '4.8°C', source: 'World Bank Climate Data', id: 'uhiIntensity' },
+            { label: 'GLOBAL COOLING EMISSIONS', value: '1.1 Gt', source: 'IEA 2025 Data', id: 'coolingEmissions' },
+            { label: 'URBAN TREE CANOPY DEFICIT', value: '-32%', source: 'FAO Urban Forestry', id: 'treeDeficit' },
+            { label: 'SEA LEVEL RISE RATE', value: '3.7 mm/yr', source: 'NOAA Climate Report', id: 'seaLevel' },
+            { label: 'EXTREME WEATHER EVENTS', value: '+43%', source: 'IPCC AR6', id: 'extremeEvents' }
+        ];
+
+        const statsGrid = document.getElementById('statsGrid');
+        
+        statsData.forEach((stat, index) => {
+            const card = document.createElement('div');
+            card.className = 'stat-card';
+            card.innerHTML = `
+                <div class="stat-label">${stat.label}</div>
+                <div class="stat-number" id="${stat.id}">${stat.value}</div>
+                <div class="stat-source">Source: ${stat.source}</div>
+            `;
+            statsGrid.appendChild(card);
+            
+            gsap.from(card, {
+                scrollTrigger: { trigger: card, start: 'top 90%' },
+                y: 40,
+                opacity: 0,
+                duration: 0.5,
+                delay: index * 0.08
+            });
+        });
+
+        // ========== RESEARCH CARDS ==========
+        const researchData = [
+            {
+                image: 'https://images.unsplash.com/photo-1534237710431-e2fc698436d0?auto=format&fit=crop&q=80&w=800',
+                category: 'URBAN MICROCLIMATE',
+                title: 'Cool Pavements and Urban Heat Mitigation',
+                excerpt: 'Reflective materials reduce surface temperatures by up to 12°C in dense urban corridors, potentially saving thousands of lives annually in heat-vulnerable cities.'
+            },
+            {
+                image: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80&w=800',
+                category: 'NATURE-BASED SOLUTIONS',
+                title: 'Green Corridors: Global Meta-Analysis',
+                excerpt: 'Analysis of 50+ cities shows strategic tree planting reduces ambient temperatures by 2-4°C, improves air quality, and provides $12 billion in annual ecosystem services.'
+            },
+            {
+                image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800',
+                category: 'CLIMATE ECONOMICS',
+                title: 'The Cooling Gap: 1.5 Trillion Opportunity',
+                excerpt: 'Economic analysis reveals passive cooling investments generate 3:1 returns through reduced energy costs, improved productivity, and avoided healthcare expenses.'
+            }
+        ];
+
+        const researchGrid = document.getElementById('researchGrid');
+        
+        researchData.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.className = 'research-card';
+            card.innerHTML = `
+                <div class="card-image" style="background-image: url('${item.image}'); background-size: cover; background-position: center;"></div>
+                <div class="card-content">
+                    <div class="card-category">${item.category}</div>
+                    <div class="card-title">${item.title}</div>
+                    <div class="card-excerpt">${item.excerpt}</div>
+                </div>
+            `;
+            researchGrid.appendChild(card);
+            
+            gsap.from(card, {
+                scrollTrigger: { trigger: card, start: 'top 85%' },
+                y: 50,
+                opacity: 0,
+                duration: 0.6,
+                delay: index * 0.1
+            });
+        });
+
+        // Calculator
+        const acSlider = document.getElementById('acSlider');
+        const householdSlider = document.getElementById('householdSlider');
+        const efficiencySlider = document.getElementById('efficiencySlider');
+        const acValue = document.getElementById('acValue');
+        const householdValue = document.getElementById('householdValue');
+        const efficiencyValue = document.getElementById('efficiencyValue');
+        const calcResult = document.getElementById('calcResult');
+
+        function calculateFootprint() {
+            const acHours = parseInt(acSlider.value);
+            const household = parseInt(householdSlider.value);
+            const efficiency = parseInt(efficiencySlider.value);
+            
+            let baseEmission = acHours * 0.18 * (household / 3);
+            const efficiencyFactor = (100 - efficiency) / 100;
+            baseEmission = baseEmission * efficiencyFactor;
+            
+            let efficiencyText = '';
+            if (efficiency >= 80) efficiencyText = 'High Efficiency';
+            else if (efficiency >= 50) efficiencyText = 'Standard';
+            else efficiencyText = 'Low Efficiency';
+            efficiencyValue.textContent = efficiencyText;
+            
+            if (baseEmission < 0.8) {
+                calcResult.innerHTML = `Low Impact: ${baseEmission.toFixed(1)} tCO₂e annually · Exemplary passive cooling performance`;
+            } else if (baseEmission < 2.0) {
+                calcResult.innerHTML = `Moderate Impact: ${baseEmission.toFixed(1)} tCO₂e annually · Consider efficiency improvements`;
+            } else {
+                calcResult.innerHTML = `High Impact: ${baseEmission.toFixed(1)} tCO₂e annually · Invest in cool roofs and insulation`;
+            }
+        }
+
+        acSlider.addEventListener('input', (e) => {
+            acValue.textContent = e.target.value + ' hours/day';
+            calculateFootprint();
+        });
+        
+        householdSlider.addEventListener('input', (e) => {
+            householdValue.textContent = e.target.value + ' residents';
+            calculateFootprint();
+        });
+        
+        efficiencySlider.addEventListener('input', (e) => {
+            calculateFootprint();
+        });
+        
+        calculateFootprint();
+
+        // Map
+        const map = L.map('globalMap').setView([20, 0], 2);
+        
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap contributors',
+            subdomains: 'abcd',
+            maxZoom: 19
+        }).addTo(map);
+
+        const vulnerableZones = [
+            { name: 'South Asia', lat: 25, lng: 78, risk: 'Extreme', tempAnomaly: '+3.2°C', initiatives: 'Urban forestry in 47 cities', color: '#d95d39' },
+            { name: 'Middle East', lat: 28, lng: 45, risk: 'Extreme', tempAnomaly: '+4.1°C', initiatives: 'Cool roofs mandate', color: '#d95d39' },
+            { name: 'Southeast Asia', lat: 15, lng: 105, risk: 'High', tempAnomaly: '+2.8°C', initiatives: 'Green corridors', color: '#e6b17e' },
+            { name: 'Southern Europe', lat: 42, lng: 12, risk: 'High', tempAnomaly: '+3.5°C', initiatives: 'Heat action plans', color: '#e6b17e' },
+            { name: 'Western United States', lat: 37, lng: -119, risk: 'High', tempAnomaly: '+3.0°C', initiatives: 'Reflective pavement', color: '#e6b17e' },
+            { name: 'Central Africa', lat: 4, lng: 20, risk: 'Moderate', tempAnomaly: '+2.1°C', initiatives: 'Passive cooling codes', color: '#b8cfc8' },
+            { name: 'Amazon Basin', lat: -10, lng: -60, risk: 'Moderate', tempAnomaly: '+1.9°C', initiatives: 'Forest protection', color: '#b8cfc8' },
+            { name: 'Northern Europe', lat: 58, lng: 15, risk: 'Low', tempAnomaly: '+1.4°C', initiatives: 'Heat preparedness', color: '#4a6741' }
+        ];
+
+        vulnerableZones.forEach(zone => {
+            const circle = L.circleMarker([zone.lat, zone.lng], {
+                radius: 15,
+                fillColor: zone.color,
+                color: '#fff',
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.7
+            }).addTo(map);
+            
+            circle.bindPopup(`
+                <strong>${zone.name}</strong><br>
+                Risk Level: ${zone.risk}<br>
+                Temperature Anomaly: ${zone.tempAnomaly}<br>
+                Active Initiative: ${zone.initiatives}
+            `);
+            
+            circle.on('click', () => {
+                const messageDiv = document.getElementById('mapMessage');
+                messageDiv.innerHTML = `${zone.name} | Risk: ${zone.risk} | ${zone.tempAnomaly} anomaly | ${zone.initiatives}`;
+                gsap.to(messageDiv, { backgroundColor: '#d95d39', duration: 0.2, yoyo: true, repeat: 1 });
+            });
+        });
+
+        // API Integration
+        async function fetchRealTimeClimateData() {
+            try {
+                const tempResponse = await fetch('https://global-warming.org/api/temperature-api');
+                if (tempResponse.ok) {
+                    const tempData = await tempResponse.json();
+                    if (tempData.result && tempData.result[0]) {
+                        const tempElement = document.getElementById('tempAnomaly');
+                        if (tempElement) {
+                            tempElement.innerHTML = `+${parseFloat(tempData.result[0].global_mean).toFixed(2)}°C`;
+                        }
+                    }
+                }
+            } catch (error) {
+                console.log('API fallback to simulated data');
+            }
+        }
+
+        setInterval(fetchRealTimeClimateData, 60000);
+        fetchRealTimeClimateData();
+
+        // Button handlers
+        document.getElementById('pledgeButton').addEventListener('click', () => {
+            alert('Thank you for joining the Thermal Shift Alliance. You will receive the climate action toolkit via email.');
+        });
+        
+        document.getElementById('exploreResearch').addEventListener('click', () => {
+            document.getElementById('research').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        document.getElementById('fullResearchBtn').addEventListener('click', () => {
+            window.location.href = 'research-detail.html';
+        });
+
+        document.getElementById('researchLink').addEventListener('click', (e) => {
+            e.preventDefault();
+            window.location.href = 'research-detail.html';
+        });
+    </script>
+</body>
+</html>

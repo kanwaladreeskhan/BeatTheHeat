@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research Library | Thermal Shift</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --deep-teal: #0a2e2a;
+            --burnt-sienna: #d95d39;
+            --dark-orange: #cc5500;
+            --sandstone: #f5efe6;
+            --charcoal: #1e1e1e;
+            --paper-border: #e2dcd0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--sandstone);
+            color: var(--charcoal);
+            line-height: 1.5;
+        }
+
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1rem 5%;
+            background: rgba(245, 239, 230, 0.98);
+            backdrop-filter: blur(12px);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .back-link {
+            color: var(--burnt-sienna);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .back-link:hover {
+            transform: translateX(-4px);
+            color: var(--dark-orange);
+        }
+
+        .library-badge {
+            font-size: 0.75rem;
+            color: var(--deep-teal);
+            background: rgba(10, 46, 42, 0.1);
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+        }
+
+        /* Header Section */
+        .research-header {
+            padding: 8rem 5% 3.5rem;
+            background: linear-gradient(135deg, var(--deep-teal) 0%, #1a4a42 100%);
+            color: white;
+            text-align: center;
+            position: relative;
+        }
+
+        .research-header h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            font-family: 'Space Grotesk', monospace;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.02em;
+        }
+
+        .shining-text {
+            background: linear-gradient(135deg, #ffffff 0%, #ffffff 25%, var(--burnt-sienna) 50%, #ffffff 75%, #ffffff 100%);
+            background-size: 250% auto;
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            animation: shineRoll 3s linear infinite;
+        }
+
+        @keyframes shineRoll {
+            0% { background-position: 100% 50%; }
+            100% { background-position: -100% 50%; }
+        }
+
+        .research-header p {
+            font-size: 1rem;
+            opacity: 0.85;
+            max-width: 550px;
+            margin: 0 auto;
+        }
+
+        /* Stats Banner */
+        .stats-banner {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--burnt-sienna);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            opacity: 0.7;
+            letter-spacing: 0.5px;
+        }
+
+        /* Filter Bar */
+        .filter-bar {
+            max-width: 1300px;
+            margin: -1.2rem auto 2rem;
+            padding: 0.8rem 1.5rem;
+            background: white;
+            border-radius: 50px;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            position: relative;
+            z-index: 10;
+        }
+
+        .filter-btn {
+            background: transparent;
+            border: none;
+            padding: 0.5rem 1.2rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            color: #4a4a4a;
+        }
+
+        .filter-btn:hover {
+            background: var(--sandstone);
+            color: var(--burnt-sienna);
+        }
+
+        .filter-btn.active {
+            background: var(--burnt-sienna);
+            color: white;
+        }
+
+        /* Research Container */
+        .research-container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 1rem 5% 3rem;
+        }
+
+        /* Research Paper Card - Professional */
+        .research-paper {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 1.25rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s ease;
+            border: 1px solid var(--paper-border);
+        }
+
+        .research-paper:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+            border-color: var(--burnt-sienna);
+        }
+
+        .paper-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            font-family: 'Space Grotesk', monospace;
+            color: var(--deep-teal);
+            margin-bottom: 0.6rem;
+            line-height: 1.35;
+        }
+
+        .paper-authors {
+            font-size: 0.85rem;
+            color: #5a5a5a;
+            margin-bottom: 0.4rem;
+        }
+
+        .paper-journal {
+            font-size: 0.8rem;
+            color: var(--burnt-sienna);
+            font-weight: 500;
+            margin-bottom: 0.8rem;
+        }
+
+        .paper-category {
+            display: inline-block;
+            background: var(--sandstone);
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--deep-teal);
+            margin-bottom: 1rem;
+            letter-spacing: 0.3px;
+        }
+
+        .paper-abstract {
+            color: #3a3a3a;
+            line-height: 1.65;
+            font-size: 0.9rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .paper-metrics {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.25rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .metric {
+            font-size: 0.75rem;
+            color: #666;
+        }
+
+        .metric-value {
+            font-weight: 700;
+            color: var(--deep-teal);
+        }
+
+        .paper-footer {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn-pdf {
+            background: transparent;
+            border: 1.5px solid var(--deep-teal);
+            padding: 0.5rem 1.2rem;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--deep-teal);
+            transition: all 0.25s ease;
+        }
+
+        .btn-pdf:hover {
+            background: var(--deep-teal);
+            color: white;
+            border-color: var(--deep-teal);
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 2.5rem;
+        }
+
+        .page-btn {
+            padding: 0.4rem 0.9rem;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .page-btn:hover {
+            background: var(--sandstone);
+        }
+
+        .page-btn.active {
+            background: var(--burnt-sienna);
+            color: white;
+            border-color: var(--burnt-sienna);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--charcoal);
+            color: #888;
+            text-align: center;
+            padding: 2rem;
+            font-size: 0.75rem;
+            margin-top: 2rem;
+        }
+
+        /* Loading & Error */
+        .loading-state, .error-state {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        .error-state {
+            color: var(--burnt-sienna);
+        }
+
+        @media (max-width: 768px) {
+            .research-header h1 { font-size: 2rem; }
+            .filter-bar { border-radius: 20px; padding: 0.8rem 1rem; }
+            .paper-title { font-size: 1.15rem; }
+            .paper-metrics { gap: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="index.html" class="back-link">← Back to Dashboard</a>
+        <span class="library-badge">Peer-Reviewed Research</span>
+    </nav>
+
+    <div class="research-header">
+        <h1>Climate <span class="shining-text">Research Library</span></h1>
+        <p>Peer-reviewed studies on urban heat mitigation, cooling technologies, and climate resilience</p>
+        <div class="stats-banner">
+            <div class="stat-item"><div class="stat-number" id="totalPapers">0</div><div class="stat-label">Research Papers</div></div>
+            <div class="stat-item"><div class="stat-number" id="categoryCount">0</div><div class="stat-label">Categories</div></div>
+            <div class="stat-item"><div class="stat-number" id="latestYear">2025</div><div class="stat-label">Latest Research</div></div>
+        </div>
+    </div>
+
+    <div class="filter-bar" id="filterBar">
+        <button class="filter-btn active" data-filter="all">All Research</button>
+    </div>
+
+    <div class="research-container" id="researchContainer">
+        <div class="loading-state">Loading research papers...</div>
+    </div>
+
+    <div class="pagination" id="pagination"></div>
+
+    <footer>
+        <p>© 2026 Thermal Shift Initiative — Open access research for global climate action</p>
+        <p style="margin-top: 0.4rem;">All papers available for download as formatted academic PDF</p>
+    </footer>
+
+    <script>
+        let allPapers = [];
+        let uniqueCategories = [];
+        let currentFilter = 'all';
+        let currentPage = 1;
+        const itemsPerPage = 10;
+
+        async function loadResearchPapers() {
+            const container = document.getElementById('researchContainer');
+            container.innerHTML = '<div class="loading-state">Loading research papers from database...</div>';
+            
+            try {
+                let response = await fetch('./research-data.json');
+                if (!response.ok) response = await fetch('research-data.json');
+                if (!response.ok) throw new Error('JSON file not found');
+                
+                const data = await response.json();
+                if (data.papers && Array.isArray(data.papers)) {
+                    allPapers = data.papers;
+                    uniqueCategories = [...new Set(allPapers.map(p => p.category))];
+                    
+                    document.getElementById('totalPapers').innerText = allPapers.length;
+                    document.getElementById('categoryCount').innerText = uniqueCategories.length;
+                    const latestYear = Math.max(...allPapers.map(p => p.year));
+                    document.getElementById('latestYear').innerText = latestYear;
+                    
+                    updateFilterButtons();
+                    renderPapers();
+                } else {
+                    throw new Error('Invalid JSON format');
+                }
+            } catch (error) {
+                container.innerHTML = `<div class="error-state">Unable to load research data. Please ensure research-data.json exists in the same directory.</div>`;
+            }
+        }
+
+        function updateFilterButtons() {
+            const filterBar = document.getElementById('filterBar');
+            const existingBtns = filterBar.querySelectorAll('.filter-btn:not([data-filter="all"])');
+            existingBtns.forEach(btn => btn.remove());
+            
+            uniqueCategories.sort().forEach(category => {
+                const btn = document.createElement('button');
+                btn.className = 'filter-btn';
+                btn.setAttribute('data-filter', category);
+                btn.textContent = category;
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentFilter = category;
+                    currentPage = 1;
+                    renderPapers();
+                });
+                filterBar.appendChild(btn);
+            });
+        }
+
+        function getFilteredPapers() {
+            if (currentFilter === 'all') return allPapers;
+            return allPapers.filter(paper => paper.category === currentFilter);
+        }
+
+        async function downloadPDF(paper) {
+            const pdfHtml = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>${paper.title}</title>
+                    <style>
+                        body {
+                            font-family: 'Georgia', 'Times New Roman', serif;
+                            margin: 2.5cm;
+                            line-height: 1.6;
+                            color: #1a1a1a;
+                        }
+                        h1 {
+                            font-size: 24pt;
+                            color: #0a2e2a;
+                            border-bottom: 2px solid #d95d39;
+                            padding-bottom: 12px;
+                            margin-bottom: 20px;
+                            font-weight: 700;
+                        }
+                        .authors {
+                            font-size: 12pt;
+                            color: #4a4a4a;
+                            margin-bottom: 8px;
+                        }
+                        .journal {
+                            font-size: 11pt;
+                            font-style: italic;
+                            color: #d95d39;
+                            margin-bottom: 25px;
+                        }
+                        .abstract-title {
+                            font-size: 14pt;
+                            font-weight: 700;
+                            margin: 25px 0 12px 0;
+                            color: #0a2e2a;
+                        }
+                        .abstract {
+                            font-size: 11pt;
+                            text-align: justify;
+                            margin-bottom: 20px;
+                        }
+                        .meta {
+                            margin-top: 30px;
+                            padding-top: 15px;
+                            border-top: 1px solid #ccc;
+                            font-size: 10pt;
+                            color: #555;
+                        }
+                        .footer {
+                            margin-top: 40px;
+                            text-align: center;
+                            font-size: 9pt;
+                            color: #999;
+                            border-top: 1px solid #eee;
+                            padding-top: 15px;
+                        }
+                        .keywords {
+                            margin-top: 15px;
+                            font-size: 10pt;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <h1>${escapeHtml(paper.title)}</h1>
+                    <div class="authors">${escapeHtml(paper.authors)}</div>
+                    <div class="journal">${escapeHtml(paper.journal)} • Volume ${paper.year} • Citations: ${paper.citations}</div>
+                    
+                    <div class="abstract-title">Abstract</div>
+                    <div class="abstract">${escapeHtml(paper.abstract)}</div>
+                    
+                    <div class="meta">
+                        <strong>Keywords:</strong> ${paper.keywords.map(k => escapeHtml(k)).join(', ')}<br>
+                        <strong>Impact Rating:</strong> ${paper.impact}<br>
+                        <strong>DOI:</strong> ${paper.doi || '10.xxxx/xxxxxx'}
+                    </div>
+                    
+                    <div class="footer">
+                        Source: Thermal Shift Research Library • Downloaded from Thermal Shift Platform<br>
+                        This document is for academic and research purposes.
+                    </div>
+                </body>
+                </html>
+            `;
+            
+            const element = document.createElement('div');
+            element.innerHTML = pdfHtml;
+            element.style.position = 'absolute';
+            element.style.left = '-9999px';
+            element.style.top = '-9999px';
+            document.body.appendChild(element);
+            
+            try {
+                const opt = {
+                    margin: [0.5, 0.5, 0.5, 0.5],
+                    filename: `${paper.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, letterRendering: true },
+                    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+                };
+                await html2pdf().set(opt).from(element).save();
+            } catch (error) {
+                alert('Unable to generate PDF. Please try again.');
+            } finally {
+                document.body.removeChild(element);
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function renderPapers() {
+            const filtered = getFilteredPapers();
+            const totalPages = Math.ceil(filtered.length / itemsPerPage);
+            const start = (currentPage - 1) * itemsPerPage;
+            const paginatedPapers = filtered.slice(start, start + itemsPerPage);
+            
+            const container = document.getElementById('researchContainer');
+            
+            if (paginatedPapers.length === 0) {
+                container.innerHTML = '<div class="error-state">No research papers found in this category.</div>';
+                document.getElementById('pagination').innerHTML = '';
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            paginatedPapers.forEach((paper, idx) => {
+                const card = document.createElement('div');
+                card.className = 'research-paper';
+                card.innerHTML = `
+                    <h2 class="paper-title">${escapeHtml(paper.title)}</h2>
+                    <div class="paper-authors">${escapeHtml(paper.authors)}</div>
+                    <div class="paper-journal">${escapeHtml(paper.journal)} · ${paper.year}</div>
+                    <div class="paper-category">${escapeHtml(paper.category)}</div>
+                    <p class="paper-abstract">${escapeHtml(paper.abstract.length > 320 ? paper.abstract.substring(0, 320) + '...' : paper.abstract)}</p>
+                    <div class="paper-metrics">
+                        <span class="metric"><span class="metric-value">${paper.citations}</span> citations</span>
+                        <span class="metric">Impact: <span class="metric-value">${paper.impact}</span></span>
+                        <span class="metric">Keywords: <span class="metric-value">${paper.keywords.slice(0, 2).join(', ')}</span></span>
+                    </div>
+                    <div class="paper-footer">
+                        <button class="btn-pdf" data-id="${paper.id}">Download PDF</button>
+                    </div>
+                `;
+                container.appendChild(card);
+                
+                gsap.from(card, {
+                    scrollTrigger: { trigger: card, start: 'top 95%' },
+                    y: 20,
+                    opacity: 0,
+                    duration: 0.4,
+                    delay: Math.min(idx * 0.04, 0.3)
+                });
+            });
+            
+            document.querySelectorAll('.btn-pdf').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = parseInt(btn.getAttribute('data-id'));
+                    const paper = allPapers.find(p => p.id === id);
+                    if (paper) downloadPDF(paper);
+                });
+            });
+            
+            renderPagination(totalPages);
+        }
+
+        function renderPagination(totalPages) {
+            const paginationDiv = document.getElementById('pagination');
+            if (totalPages <= 1) {
+                paginationDiv.innerHTML = '';
+                return;
+            }
+            
+            let html = '';
+            if (currentPage > 1) {
+                html += `<button class="page-btn" data-page="${currentPage - 1}">Previous</button>`;
+            }
+            
+            for (let i = 1; i <= Math.min(totalPages, 5); i++) {
+                html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" data-page="${i}">${i}</button>`;
+            }
+            
+            if (totalPages > 5) {
+                html += `<span style="padding: 0.4rem;">...</span>`;
+                html += `<button class="page-btn" data-page="${totalPages}">${totalPages}</button>`;
+            }
+            
+            if (currentPage < totalPages) {
+                html += `<button class="page-btn" data-page="${currentPage + 1}">Next</button>`;
+            }
+            
+            paginationDiv.innerHTML = html;
+            
+            document.querySelectorAll('.page-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const page = parseInt(btn.getAttribute('data-page'));
+                    if (!isNaN(page)) {
+                        currentPage = page;
+                        renderPapers();
+                        window.scrollTo({ top: 350, behavior: 'smooth' });
+                    }
+                });
+            });
+        }
+
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.getAttribute('data-filter');
+                currentPage = 1;
+                renderPapers();
+            });
+        });
+        
+        loadResearchPapers();
+    </script>
+</body>
+</html>
