@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
     <style>
         * {
             margin: 0;
@@ -31,7 +31,32 @@
             line-height: 1.5;
         }
 
-        /* Navigation */
+        /* Print Styles - For PDF */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+                margin: 0;
+            }
+            .navbar, .filter-bar, .pagination, .btn-pdf, .research-header, footer, .stats-banner {
+                display: none !important;
+            }
+            .research-paper {
+                page-break-after: avoid;
+                page-break-inside: avoid;
+                border: none;
+                padding: 1rem;
+                margin: 0;
+                box-shadow: none;
+            }
+            .paper-abstract {
+                font-size: 11pt;
+            }
+            .print-pdf-container {
+                display: block !important;
+            }
+        }
+
         .navbar {
             position: fixed;
             top: 0;
@@ -67,21 +92,18 @@
             border-radius: 20px;
         }
 
-        /* Header Section */
         .research-header {
-            padding: 8rem 5% 3.5rem;
+            padding: 7rem 5% 3rem;
             background: linear-gradient(135deg, var(--deep-teal) 0%, #1a4a42 100%);
             color: white;
             text-align: center;
-            position: relative;
         }
 
         .research-header h1 {
-            font-size: 2.8rem;
+            font-size: 2.5rem;
             font-weight: 700;
             font-family: 'Space Grotesk', monospace;
             margin-bottom: 0.75rem;
-            letter-spacing: -0.02em;
         }
 
         .shining-text {
@@ -98,14 +120,6 @@
             100% { background-position: -100% 50%; }
         }
 
-        .research-header p {
-            font-size: 1rem;
-            opacity: 0.85;
-            max-width: 550px;
-            margin: 0 auto;
-        }
-
-        /* Stats Banner */
         .stats-banner {
             display: flex;
             justify-content: center;
@@ -119,22 +133,20 @@
         }
 
         .stat-number {
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             font-weight: 700;
             color: var(--burnt-sienna);
         }
 
         .stat-label {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             opacity: 0.7;
-            letter-spacing: 0.5px;
         }
 
-        /* Filter Bar */
         .filter-bar {
             max-width: 1300px;
-            margin: -1.2rem auto 2rem;
-            padding: 0.8rem 1.5rem;
+            margin: -1rem auto 2rem;
+            padding: 0.7rem 1.5rem;
             background: white;
             border-radius: 50px;
             display: flex;
@@ -149,7 +161,7 @@
         .filter-btn {
             background: transparent;
             border: none;
-            padding: 0.5rem 1.2rem;
+            padding: 0.4rem 1.1rem;
             border-radius: 50px;
             font-size: 0.8rem;
             font-weight: 500;
@@ -158,24 +170,17 @@
             color: #4a4a4a;
         }
 
-        .filter-btn:hover {
-            background: var(--sandstone);
-            color: var(--burnt-sienna);
-        }
-
-        .filter-btn.active {
+        .filter-btn:hover, .filter-btn.active {
             background: var(--burnt-sienna);
             color: white;
         }
 
-        /* Research Container */
         .research-container {
             max-width: 1300px;
             margin: 0 auto;
             padding: 1rem 5% 3rem;
         }
 
-        /* Research Paper Card - Professional */
         .research-paper {
             background: white;
             border-radius: 12px;
@@ -193,18 +198,17 @@
         }
 
         .paper-title {
-            font-size: 1.35rem;
+            font-size: 1.3rem;
             font-weight: 700;
             font-family: 'Space Grotesk', monospace;
             color: var(--deep-teal);
-            margin-bottom: 0.6rem;
-            line-height: 1.35;
+            margin-bottom: 0.5rem;
         }
 
         .paper-authors {
             font-size: 0.85rem;
             color: #5a5a5a;
-            margin-bottom: 0.4rem;
+            margin-bottom: 0.3rem;
         }
 
         .paper-journal {
@@ -223,12 +227,11 @@
             font-weight: 600;
             color: var(--deep-teal);
             margin-bottom: 1rem;
-            letter-spacing: 0.3px;
         }
 
         .paper-abstract {
             color: #3a3a3a;
-            line-height: 1.65;
+            line-height: 1.6;
             font-size: 0.9rem;
             margin-bottom: 1.25rem;
         }
@@ -255,6 +258,7 @@
         .paper-footer {
             display: flex;
             justify-content: flex-end;
+            gap: 1rem;
         }
 
         .btn-pdf {
@@ -272,15 +276,28 @@
         .btn-pdf:hover {
             background: var(--deep-teal);
             color: white;
-            border-color: var(--deep-teal);
         }
 
-        /* Pagination */
+        .btn-print {
+            background: var(--burnt-sienna);
+            border: none;
+            padding: 0.5rem 1.2rem;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .btn-print:hover {
+            opacity: 0.9;
+        }
+
         .pagination {
             display: flex;
             justify-content: center;
             gap: 0.5rem;
-            margin-top: 2.5rem;
+            margin-top: 2rem;
         }
 
         .page-btn {
@@ -290,11 +307,6 @@
             cursor: pointer;
             border-radius: 8px;
             font-size: 0.8rem;
-            transition: all 0.2s;
-        }
-
-        .page-btn:hover {
-            background: var(--sandstone);
         }
 
         .page-btn.active {
@@ -303,32 +315,29 @@
             border-color: var(--burnt-sienna);
         }
 
-        /* Footer */
         footer {
             background: var(--charcoal);
             color: #888;
             text-align: center;
             padding: 2rem;
-            font-size: 0.75rem;
-            margin-top: 2rem;
+            font-size: 0.7rem;
         }
 
-        /* Loading & Error */
         .loading-state, .error-state {
             text-align: center;
             padding: 3rem;
             color: #666;
         }
 
-        .error-state {
-            color: var(--burnt-sienna);
+        /* Hidden print container */
+        .print-pdf-container {
+            display: none;
         }
 
         @media (max-width: 768px) {
-            .research-header h1 { font-size: 2rem; }
-            .filter-bar { border-radius: 20px; padding: 0.8rem 1rem; }
-            .paper-title { font-size: 1.15rem; }
-            .paper-metrics { gap: 1rem; }
+            .research-header h1 { font-size: 1.8rem; }
+            .paper-title { font-size: 1.1rem; }
+            .paper-footer { flex-direction: column; align-items: flex-end; }
         }
     </style>
 </head>
@@ -361,7 +370,7 @@
 
     <footer>
         <p>© 2026 Thermal Shift Initiative — Open access research for global climate action</p>
-        <p style="margin-top: 0.4rem;">All papers available for download as formatted academic PDF</p>
+        <p style="margin-top: 0.4rem;">Click "Save as PDF" on any paper to download professionally formatted PDF</p>
     </footer>
 
     <script>
@@ -373,7 +382,7 @@
 
         async function loadResearchPapers() {
             const container = document.getElementById('researchContainer');
-            container.innerHTML = '<div class="loading-state">Loading research papers from database...</div>';
+            container.innerHTML = '<div class="loading-state">Loading research papers...</div>';
             
             try {
                 let response = await fetch('./research-data.json');
@@ -396,7 +405,7 @@
                     throw new Error('Invalid JSON format');
                 }
             } catch (error) {
-                container.innerHTML = `<div class="error-state">Unable to load research data. Please ensure research-data.json exists in the same directory.</div>`;
+                container.innerHTML = `<div class="error-state">Unable to load research data. Please ensure research-data.json exists.</div>`;
             }
         }
 
@@ -426,8 +435,17 @@
             return allPapers.filter(paper => paper.category === currentFilter);
         }
 
-        async function downloadPDF(paper) {
-            const pdfHtml = `
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // WORKING PDF GENERATION - Using browser's print to PDF
+        function downloadPDF(paper) {
+            // Create print-friendly HTML
+            const printContent = `
                 <!DOCTYPE html>
                 <html>
                 <head>
@@ -435,22 +453,21 @@
                     <title>${paper.title}</title>
                     <style>
                         body {
-                            font-family: 'Georgia', 'Times New Roman', serif;
-                            margin: 2.5cm;
-                            line-height: 1.6;
+                            font-family: 'Times New Roman', Times, serif;
+                            margin: 2cm;
+                            line-height: 1.5;
                             color: #1a1a1a;
                         }
                         h1 {
-                            font-size: 24pt;
+                            font-size: 22pt;
                             color: #0a2e2a;
                             border-bottom: 2px solid #d95d39;
-                            padding-bottom: 12px;
-                            margin-bottom: 20px;
-                            font-weight: 700;
+                            padding-bottom: 10px;
+                            margin-bottom: 15px;
                         }
                         .authors {
                             font-size: 12pt;
-                            color: #4a4a4a;
+                            color: #555;
                             margin-bottom: 8px;
                         }
                         .journal {
@@ -461,8 +478,8 @@
                         }
                         .abstract-title {
                             font-size: 14pt;
-                            font-weight: 700;
-                            margin: 25px 0 12px 0;
+                            font-weight: bold;
+                            margin: 20px 0 10px 0;
                             color: #0a2e2a;
                         }
                         .abstract {
@@ -471,23 +488,19 @@
                             margin-bottom: 20px;
                         }
                         .meta {
-                            margin-top: 30px;
-                            padding-top: 15px;
+                            margin-top: 25px;
+                            padding-top: 12px;
                             border-top: 1px solid #ccc;
                             font-size: 10pt;
                             color: #555;
                         }
                         .footer {
-                            margin-top: 40px;
+                            margin-top: 35px;
                             text-align: center;
                             font-size: 9pt;
                             color: #999;
                             border-top: 1px solid #eee;
-                            padding-top: 15px;
-                        }
-                        .keywords {
-                            margin-top: 15px;
-                            font-size: 10pt;
+                            padding-top: 12px;
                         }
                     </style>
                 </head>
@@ -506,40 +519,30 @@
                     </div>
                     
                     <div class="footer">
-                        Source: Thermal Shift Research Library • Downloaded from Thermal Shift Platform<br>
-                        This document is for academic and research purposes.
+                        Source: Thermal Shift Research Library<br>
+                        Downloaded from Thermal Shift Platform • ${new Date().toLocaleDateString()}
                     </div>
                 </body>
                 </html>
             `;
             
-            const element = document.createElement('div');
-            element.innerHTML = pdfHtml;
-            element.style.position = 'absolute';
-            element.style.left = '-9999px';
-            element.style.top = '-9999px';
-            document.body.appendChild(element);
+            // Create blob and open in new window for printing
+            const blob = new Blob([printContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const printWindow = window.open(url, '_blank');
             
-            try {
-                const opt = {
-                    margin: [0.5, 0.5, 0.5, 0.5],
-                    filename: `${paper.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`,
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2, letterRendering: true },
-                    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+            if (printWindow) {
+                printWindow.onload = function() {
+                    setTimeout(function() {
+                        printWindow.print();
+                        setTimeout(function() {
+                            URL.revokeObjectURL(url);
+                        }, 1000);
+                    }, 500);
                 };
-                await html2pdf().set(opt).from(element).save();
-            } catch (error) {
-                alert('Unable to generate PDF. Please try again.');
-            } finally {
-                document.body.removeChild(element);
+            } else {
+                alert('Please allow pop-ups to download PDF');
             }
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
         }
 
         function renderPapers() {
@@ -573,7 +576,7 @@
                         <span class="metric">Keywords: <span class="metric-value">${paper.keywords.slice(0, 2).join(', ')}</span></span>
                     </div>
                     <div class="paper-footer">
-                        <button class="btn-pdf" data-id="${paper.id}">Download PDF</button>
+                        <button class="btn-pdf" data-id="${paper.id}">Save as PDF</button>
                     </div>
                 `;
                 container.appendChild(card);
@@ -591,7 +594,9 @@
                 btn.addEventListener('click', (e) => {
                     const id = parseInt(btn.getAttribute('data-id'));
                     const paper = allPapers.find(p => p.id === id);
-                    if (paper) downloadPDF(paper);
+                    if (paper) {
+                        downloadPDF(paper);
+                    }
                 });
             });
             
